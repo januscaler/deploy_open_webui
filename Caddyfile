@@ -1,0 +1,13 @@
+webui.januscaler.com {
+    reverse_proxy open-webui:8080
+  tls {
+  dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+
+    }
+
+    header {
+        # Allow WebSockets to function correctly
+        Connection * 
+    }
+}
+
