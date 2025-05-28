@@ -1,4 +1,3 @@
-# Open WebUI Deployment (Docker)
+# Caddy Cloudflare deployer
 
-This project runs [Open WebUI](https://github.com/open-webui/open-webui) using Docker with persistent data storage on the host.
-
+this project uses caddy fresh docker build with cloudflare module support for Full SSL encryption
