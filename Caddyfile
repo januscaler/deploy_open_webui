@@ -11,3 +11,76 @@ webui.januscaler.com {
     }
 }
 
+januscaler.com {
+    reverse_proxy 127.0.0.1:8056
+  tls {
+  dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+
+    }
+
+    header {
+        # Preserve headers similar to nginx proxy_set_header
+        Host {host}
+        X-Real-IP {remote_host}
+        X-Forwarded-For {remote_host}
+        X-Forwarded-Proto {scheme}
+    }
+}
+
+klyar.com {
+    # Redirect HTTP to HTTPS automatically (default behavior)
+    
+    reverse_proxy 127.0.0.1:2368
+
+    tls /etc/letsencrypt/live/klyar.com/fullchain.pem /etc/letsencrypt/live/klyar.com/privkey.pem
+
+    # Optional headers similar to nginx proxy headers
+    header_up Host {http.request.host}
+    header_up X-Real-IP {http.request.remote}
+    header_up X-Forwarded-Proto https
+    header_up X-Forwarded-For {http.request.header.X-Forwarded-For}
+}
+
+
+janus1.januscaler.com {
+  tls {
+  dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+
+    }
+
+    # Handle /admin/ws websocket proxy
+    @admin_ws {
+        path /admin/ws*
+    }
+    reverse_proxy @admin_ws 127.0.0.1:7188 {
+        # WebSocket support headers are handled automatically by Caddy
+        header_up Host {host}
+    }
+
+    # Handle /admin REST API proxy (prefix /admin)
+    @admin_rest {
+        path /admin*
+    }
+    reverse_proxy @admin_rest 127.0.0.1:7088 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+
+    # Handle /janus/ws websocket proxy
+    @janus_ws {
+        path /janus/ws*
+    }
+    reverse_proxy @janus_ws 127.0.0.1:8188 {
+        header_up Host {host}
+    }
+
+    # Handle /janus REST API proxy (prefix /janus)
+    @janus_rest {
+        path /janus*
+    }
+    reverse_proxy @janus_rest 127.0.0.1:8088 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}
+
